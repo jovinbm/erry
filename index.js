@@ -1,4 +1,4 @@
-function Err() {
+function Erry() {
   var self                    = this;
   self._default_error_message = 'Something went wrong while performing that request';
   
@@ -26,14 +26,14 @@ function Err() {
 }
 
 // prototypically inherit from the Error constructor
-Err.prototype             = Object.create(Error.prototype);
-Err.prototype.constructor = Err;
+Erry.prototype             = Object.create(Error.prototype);
+Erry.prototype.constructor = Erry;
 
 /**
  *
- * @returns {Err}
+ * @returns {Erry}
  */
-Err.prototype.fatal = function () {
+Erry.prototype.fatal = function () {
   var self    = this;
   self._fatal = true;
   return self;
@@ -41,9 +41,9 @@ Err.prototype.fatal = function () {
 
 /**
  *
- * @returns {Err}
+ * @returns {Erry}
  */
-Err.prototype.handled = function () {
+Erry.prototype.handled = function () {
   var self      = this;
   self._handled = true;
   return self;
@@ -52,9 +52,9 @@ Err.prototype.handled = function () {
 /**
  *
  * @param {string} url
- * @returns {Err}
+ * @returns {Erry}
  */
-Err.prototype.request = function (url) {
+Erry.prototype.request = function (url) {
   var self = this;
   
   if (typeof url !== 'string') {
@@ -76,9 +76,9 @@ Err.prototype.request = function (url) {
  *
  * @param {string} type - [info|warning|error]
  * @param {string} msg
- * @returns {Err}
+ * @returns {Erry}
  */
-Err.prototype.notify = function (type = 'info', msg = 'Something went wrong while performing that request') {
+Erry.prototype.notify = function (type = 'info', msg = 'Something went wrong while performing that request') {
   var self = this;
   
   self._notification.status = true;
@@ -124,9 +124,9 @@ Err.prototype.notify = function (type = 'info', msg = 'Something went wrong whil
 /**
  *
  * @param {number} code
- * @returns {Err}
+ * @returns {Erry}
  */
-Err.prototype.code = function (code = 500) {
+Erry.prototype.code = function (code = 500) {
   var self = this;
   if (typeof code !== 'number') {
     self._instance_errors.push(`.code: Received code of type ${typeof code}`);
@@ -141,9 +141,9 @@ Err.prototype.code = function (code = 500) {
 /**
  *
  * @param {string} name
- * @returns {Err}
+ * @returns {Erry}
  */
-Err.prototype.name = function (name = 'Error') {
+Erry.prototype.name = function (name = 'Error') {
   var self = this;
   if (typeof name !== 'string') {
     self._instance_errors.push(`.name: Received name of type ${typeof name}`);
@@ -163,9 +163,9 @@ Err.prototype.name = function (name = 'Error') {
 /**
  *
  * @param {string} message
- * @returns {Err}
+ * @returns {Erry}
  */
-Err.prototype.message = function (message = 'Something went wrong while performing that request') {
+Erry.prototype.message = function (message = 'Something went wrong while performing that request') {
   var self = this;
   
   if (typeof message !== 'string') {
@@ -186,9 +186,9 @@ Err.prototype.message = function (message = 'Something went wrong while performi
 /**
  *
  * @param {string} url
- * @returns {Err}
+ * @returns {Erry}
  */
-Err.prototype.redirect = function (url) {
+Erry.prototype.redirect = function (url) {
   var self = this;
   
   if (typeof url !== 'string') {
@@ -211,12 +211,12 @@ Err.prototype.redirect = function (url) {
 
 /**
  *
- * @returns {Err}
+ * @returns {Erry}
  */
-Err.prototype.logout = function () {
+Erry.prototype.logout = function () {
   var self     = this;
   self._logout = true;
   return self;
 };
 
-exports.err = Err;
+exports.err = Erry;
