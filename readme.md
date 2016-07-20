@@ -1,0 +1,1 @@
+# A simple error module used at The African Exponent
