@@ -1,26 +1,36 @@
-function Erry() {
-  var self                    = this;
-  self._default_error_message = 'Something went wrong while performing that request';
+/**
+ *
+ * @param {Error|Erry} [error]
+ * @returns {Erry}
+ * @constructor
+ */
+function Erry(error) {
+  var self = this;
   
-  self._fatal        = false;
-  self._notification = {
-    status: false,
-    type  : 'info',
-    msg   : self._default_error_message
-  };
-  self._code         = 500;
-  self._name         = 'Error';
-  self._message      = self._default_error_message;
-  self._handled      = false;
-  self._logout       = false;
-  self._request      = null;
-  self._redirect     = {
-    status: false, // whether to redirect
-    url   : ''     // url/path
+  self._helpers = {
+    default_error_message: 'Something went wrong while performing that request'
   };
   
-  // errors when the error object is not instantiated correctly
-  self._instance_errors = [];
+  self._payload = {
+    fatal          : false,
+    notification   : {
+      status: false,
+      type  : 'info',
+      msg   : self._helpers.default_error_message
+    },
+    code           : 500,
+    name           : 'Error',
+    message        : self._helpers.default_error_message,
+    handled        : false,
+    logout         : false,
+    request        : null,
+    redirect       : {
+      status: false, // whether to redirect
+      url   : ''     // url/path
+    },
+    error_data     : [], // data to include in the error e.g. ajv errors
+    instance_errors: [],
+  };
   
   return self;
 }
@@ -31,11 +41,22 @@ Erry.prototype.constructor = Erry;
 
 /**
  *
+ * @param {*} data
+ * @returns {Erry}
+ */
+Erry.prototype.data = function (data) {
+  var self = this;
+  self._payload.error_data.push(data);
+  return self;
+};
+
+/**
+ *
  * @returns {Erry}
  */
 Erry.prototype.fatal = function () {
-  var self    = this;
-  self._fatal = true;
+  var self            = this;
+  self._payload.fatal = true;
   return self;
 };
 
@@ -44,8 +65,8 @@ Erry.prototype.fatal = function () {
  * @returns {Erry}
  */
 Erry.prototype.handled = function () {
-  var self      = this;
-  self._handled = true;
+  var self              = this;
+  self._payload.handled = true;
   return self;
 };
 
@@ -58,16 +79,16 @@ Erry.prototype.request = function (url) {
   var self = this;
   
   if (typeof url !== 'string') {
-    self._instance_errors.push(`.request: Received url of type ${typeof url}`);
+    self._payload.instance_errors.push(`.request: Received url of type ${typeof url}`);
     return self;
   }
   
   if (url.length === 0) {
-    self._instance_errors.push(`.request: Received url of length 0`);
+    self._payload.instance_errors.push(`.request: Received url of length 0`);
     return self;
   }
   
-  self._request = url;
+  self._payload.request = url;
   
   return self;
 };
@@ -81,41 +102,41 @@ Erry.prototype.request = function (url) {
 Erry.prototype.notify = function (type = 'info', msg = 'Something went wrong while performing that request') {
   var self = this;
   
-  self._notification.status = true;
+  self._payload.notification.status = true;
   
   // check type
   if (typeof type !== 'string') {
-    self._instance_errors.push(`.notify: Received type of type ${typeof msg}`);
+    self._payload.instance_errors.push(`.notify: Received type of type ${typeof msg}`);
     type = 'info';
   }
   
   if (type.length === 0) {
-    self._instance_errors.push(`.notify: Received type of length 0`);
+    self._payload.instance_errors.push(`.notify: Received type of length 0`);
     type = 'info';
   }
   
   if (['error', 'warning', 'info'].indexOf(type) === -1) {
-    self._instance_errors.push(`.notify: Unknown error type ${type}`);
+    self._payload.instance_errors.push(`.notify: Unknown error type ${type}`);
     type = 'info';
   }
   
-  self._notification.type = type;
+  self._payload.notification.type = type;
   
   // check msg
   if (typeof msg !== 'string') {
-    self._instance_errors.push(`.notify: Received msg of type ${typeof msg}`);
-    msg = self._default_error_message;
+    self._payload.instance_errors.push(`.notify: Received msg of type ${typeof msg}`);
+    msg = self._helpers.default_error_message;
   }
   
   if (msg.length === 0) {
-    self._instance_errors.push(`.notify: Received msg of length 0`);
-    msg = self._default_error_message;
+    self._payload.instance_errors.push(`.notify: Received msg of length 0`);
+    msg = self._helpers.default_error_message;
   }
   
-  self._notification.msg = msg;
+  self._payload.notification.msg = msg;
   
-  if (self._message === self._default_error_message) {
-    self._message = msg;
+  if (self._payload.message === self._helpers.default_error_message) {
+    self._payload.message = msg;
   }
   
   return self;
@@ -129,11 +150,11 @@ Erry.prototype.notify = function (type = 'info', msg = 'Something went wrong whi
 Erry.prototype.code = function (code = 500) {
   var self = this;
   if (typeof code !== 'number') {
-    self._instance_errors.push(`.code: Received code of type ${typeof code}`);
+    self._payload.instance_errors.push(`.code: Received code of type ${typeof code}`);
     code = 500;
   }
   
-  self._code = code;
+  self._payload.code = code;
   
   return self;
 };
@@ -146,16 +167,16 @@ Erry.prototype.code = function (code = 500) {
 Erry.prototype.name = function (name = 'Error') {
   var self = this;
   if (typeof name !== 'string') {
-    self._instance_errors.push(`.name: Received name of type ${typeof name}`);
+    self._payload.instance_errors.push(`.name: Received name of type ${typeof name}`);
     name = 'Error';
   }
   
   if (name.length === 0) {
-    self._instance_errors.push(`.name: Received name of length 0`);
+    self._payload.instance_errors.push(`.name: Received name of length 0`);
     name = 'Error';
   }
   
-  self._name = name;
+  self._payload.name = name;
   
   return self;
 };
@@ -169,16 +190,16 @@ Erry.prototype.message = function (message = 'Something went wrong while perform
   var self = this;
   
   if (typeof message !== 'string') {
-    self._instance_errors.push(`.message: Received message of type ${typeof message}`);
+    self._payload.instance_errors.push(`.message: Received message of type ${typeof message}`);
     message = 'Something went wrong while performing that request';
   }
   
   if (message.length === 0) {
-    self._instance_errors.push(`.message: Received message of length 0`);
+    self._payload.instance_errors.push(`.message: Received message of length 0`);
     message = 'Something went wrong while performing that request';
   }
   
-  self._message = message;
+  self._payload.message = message;
   
   return self;
 };
@@ -192,16 +213,16 @@ Erry.prototype.redirect = function (url) {
   var self = this;
   
   if (typeof url !== 'string') {
-    self._instance_errors.push(`.url: Received url of type ${typeof url}`);
+    self._payload.instance_errors.push(`.url: Received url of type ${typeof url}`);
     return self;
   }
   
   if (url.length === 0) {
-    self._instance_errors.push(`.url: Received url of length 0`);
+    self._payload.instance_errors.push(`.url: Received url of length 0`);
     return self;
   }
   
-  self._redirect = {
+  self._payload.redirect = {
     status: true,
     url   : url
   };
@@ -214,8 +235,8 @@ Erry.prototype.redirect = function (url) {
  * @returns {Erry}
  */
 Erry.prototype.logout = function () {
-  var self     = this;
-  self._logout = true;
+  var self             = this;
+  self._payload.logout = true;
   return self;
 };
 
