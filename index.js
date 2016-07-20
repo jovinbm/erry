@@ -219,4 +219,4 @@ Erry.prototype.logout = function () {
   return self;
 };
 
-exports.err = Erry;
+exports.erry = Erry;
