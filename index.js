@@ -1,3 +1,5 @@
+var extend = require('extend');
+
 /**
  *
  * @param {Error|Erry} [error]
@@ -8,6 +10,7 @@ function Erry(error) {
   var self = this;
   
   self._helpers = {
+    default_error_name   : 'Something went wrong while performing that request',
     default_error_message: 'Something went wrong while performing that request'
   };
   
@@ -19,7 +22,7 @@ function Erry(error) {
       msg   : self._helpers.default_error_message
     },
     code           : 500,
-    name           : 'Error',
+    name           : self._helpers.default_error_name,
     message        : self._helpers.default_error_message,
     handled        : false,
     logout         : false,
@@ -31,6 +34,36 @@ function Erry(error) {
     error_data     : [], // data to include in the error e.g. ajv errors
     instance_errors: [],
   };
+  
+  // emulate norma error
+  self.name    = self._helpers.default_error_name;
+  self.message = self._helpers.default_error_message;
+  self.stack   = (new Error()).stack;
+  
+  if (error && typeof error === 'object') {
+    
+    if (error instanceof Erry) {
+      self._payload = extend(self._payload, error._payload);
+    }
+    
+    if (error instanceof Error) {
+      
+      // also includes instances of Erry
+      
+      self.name    = error.name;
+      self.message = error.message;
+      self.stack   = error.stack;
+    }
+    
+    // copy remaining error properties:
+    
+    for (var prop in error) {
+      if (error.hasOwnProperty(prop) && !self.hasOwnProperty(prop)) {
+        self[prop] = error[prop];
+      }
+    }
+    
+  }
   
   return self;
 }
@@ -99,7 +132,7 @@ Erry.prototype.request = function (url) {
  * @param {string} msg
  * @returns {Erry}
  */
-Erry.prototype.notify = function (type = 'info', msg = 'Something went wrong while performing that request') {
+Erry.prototype.notify = function (type = 'info', msg) {
   var self = this;
   
   self._payload.notification.status = true;
@@ -164,16 +197,16 @@ Erry.prototype.code = function (code = 500) {
  * @param {string} name
  * @returns {Erry}
  */
-Erry.prototype.name = function (name = 'Error') {
+Erry.prototype.name = function (name) {
   var self = this;
   if (typeof name !== 'string') {
     self._payload.instance_errors.push(`.name: Received name of type ${typeof name}`);
-    name = 'Error';
+    name = self._helpers.default_error_name;
   }
   
   if (name.length === 0) {
     self._payload.instance_errors.push(`.name: Received name of length 0`);
-    name = 'Error';
+    name = self._helpers.default_error_name;
   }
   
   self._payload.name = name;
@@ -186,17 +219,17 @@ Erry.prototype.name = function (name = 'Error') {
  * @param {string} message
  * @returns {Erry}
  */
-Erry.prototype.message = function (message = 'Something went wrong while performing that request') {
+Erry.prototype.message = function (message) {
   var self = this;
   
   if (typeof message !== 'string') {
     self._payload.instance_errors.push(`.message: Received message of type ${typeof message}`);
-    message = 'Something went wrong while performing that request';
+    message = self._helpers.default_error_message;
   }
   
   if (message.length === 0) {
     self._payload.instance_errors.push(`.message: Received message of length 0`);
-    message = 'Something went wrong while performing that request';
+    message = self._helpers.default_error_message;
   }
   
   self._payload.message = message;
