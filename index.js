@@ -243,7 +243,7 @@ Erry.prototype.code = function (code = 500) {
  * @param {string} name
  * @returns {Erry}
  */
-Erry.prototype.name = function (name) {
+Erry.prototype.setName = function (name) {
   var self = this;
   if (typeof name !== 'string') {
     self._payload.instance_errors.push(`.name: Received name of type ${typeof name}`);
@@ -270,7 +270,7 @@ Erry.prototype.name = function (name) {
  * @param {string} message
  * @returns {Erry}
  */
-Erry.prototype.message = function (message) {
+Erry.prototype.setMessage = function (message) {
   var self = this;
   
   if (typeof message !== 'string') {
