@@ -158,6 +158,16 @@ Erry.prototype.request = function (url) {
 
 /**
  *
+ * @returns {Erry}
+ */
+Erry.prototype.dontNotify = function () {
+  var self                          = this;
+  self._payload.notification.status = false;
+  return self;
+};
+
+/**
+ *
  * @param {string} type - [info|warning|error]
  * @param {string} msg
  * @returns {Erry}
