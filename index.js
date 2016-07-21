@@ -9,9 +9,9 @@ var extend = require('extend');
 function Erry(error) {
   var self = this;
   
-  self._helpers = {
-    default_error_name   : 'Something went wrong while performing that request',
-    default_error_message: 'Something went wrong while performing that request'
+  self._defaults = {
+    name   : 'Error',
+    message: 'Something went wrong while performing that request'
   };
   
   self._payload = {
@@ -19,11 +19,11 @@ function Erry(error) {
     notification   : {
       status: false,
       type  : 'info',
-      msg   : self._helpers.default_error_message
+      msg   : self._defaults.message
     },
     code           : 500,
-    name           : self._helpers.default_error_name,
-    message        : self._helpers.default_error_message,
+    name           : self._defaults.name,
+    message        : self._defaults.message,
     handled        : false,
     logout         : false,
     request        : null,
@@ -36,8 +36,8 @@ function Erry(error) {
   };
   
   // emulate norma error
-  self.name    = self._helpers.default_error_name;
-  self.message = self._helpers.default_error_message;
+  self.name    = self._defaults.name;
+  self.message = self._defaults.message;
   self.stack   = (new Error()).stack;
   
   if (error && typeof error === 'object') {
@@ -158,18 +158,61 @@ Erry.prototype.notify = function (type = 'info', msg) {
   // check msg
   if (typeof msg !== 'string') {
     self._payload.instance_errors.push(`.notify: Received msg of type ${typeof msg}`);
-    msg = self._helpers.default_error_message;
+    msg = self._defaults.message;
   }
   
   if (msg.length === 0) {
     self._payload.instance_errors.push(`.notify: Received msg of length 0`);
-    msg = self._helpers.default_error_message;
+    msg = self._defaults.message;
   }
   
   self._payload.notification.msg = msg;
   
-  if (self._payload.message === self._helpers.default_error_message) {
+  if (self._payload.message === self._defaults.message) {
     self._payload.message = msg;
+  }
+  
+  return self;
+};
+
+/**
+ *
+ * @param {string} message
+ * @returns {Erry}
+ */
+Erry.prototype.systemError = function (message) {
+  var self = this;
+  
+  // incur system error code
+  self._payload.code = 500;
+  
+  // check message
+  if (typeof message !== 'string') {
+    self._payload.instance_errors.push(`.systemError: Received message of type ${typeof message}`);
+    message = self._defaults.message;
+  }
+  
+  if (message.length === 0) {
+    self._payload.instance_errors.push(`.notify: Received msg of length 0`);
+    message = self._defaults.message;
+  }
+  
+  if (!self._payload.notification.status) {
+    self._payload.notification.status = true;
+    self._payload.notification.msg    = self._defaults.message;
+  }
+  
+  // override
+  self._payload.notification.type = 'warning';
+  
+  // change iff not default
+  if (self._payload.message === self._defaults.message) {
+    self._payload.message = message;
+  }
+  
+  // change iff not default
+  if (self.message === self._defaults.message) {
+    self.message = message;
   }
   
   return self;
@@ -201,15 +244,20 @@ Erry.prototype.name = function (name) {
   var self = this;
   if (typeof name !== 'string') {
     self._payload.instance_errors.push(`.name: Received name of type ${typeof name}`);
-    name = self._helpers.default_error_name;
+    name = self._defaults.name;
   }
   
   if (name.length === 0) {
     self._payload.instance_errors.push(`.name: Received name of length 0`);
-    name = self._helpers.default_error_name;
+    name = self._defaults.name;
   }
   
   self._payload.name = name;
+  
+  // if self.name is still default, change it
+  if (self.name === self._defaults.name) {
+    self.name = name;
+  }
   
   return self;
 };
@@ -224,15 +272,20 @@ Erry.prototype.message = function (message) {
   
   if (typeof message !== 'string') {
     self._payload.instance_errors.push(`.message: Received message of type ${typeof message}`);
-    message = self._helpers.default_error_message;
+    message = self._defaults.message;
   }
   
   if (message.length === 0) {
     self._payload.instance_errors.push(`.message: Received message of length 0`);
-    message = self._helpers.default_error_message;
+    message = self._defaults.message;
   }
   
   self._payload.message = message;
+  
+  // if self.message is still default, change it
+  if (self.message === self._defaults.message) {
+    self.message = message;
+  }
   
   return self;
 };
