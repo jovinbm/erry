@@ -1,4 +1,5 @@
-var extend = require('extend');
+var extend           = require('extend');
+var errorCodeMessage = require('./errorCodeMessage').errorCodeMessage;
 
 /**
  *
@@ -73,6 +74,35 @@ Erry.prototype             = Object.create(Error.prototype);
 Erry.prototype.constructor = Erry;
 
 /**
+ * Private: Applies message to self.message, self._payload.message of
+ * the error IF they are still default
+ * @param {string} message
+ * @returns {Erry}
+ * @private
+ */
+Erry.prototype._applyMessage = function (message) {
+  var self = this;
+  
+  if (typeof message !== 'string') {
+    self._payload.instance_errors.push(`._applyMessage: Received message of type ${typeof message}`);
+    return self;
+  }
+  
+  if (message.length === 0) {
+    self._payload.instance_errors.push(`._applyMessage: Received message of length 0`);
+    return self;
+  }
+  
+  // change iff not default
+  if (message !== self._defaults.message) {
+    self._payload.message = message;
+    self.message          = message;
+  }
+  
+  return self;
+};
+
+/**
  *
  * @param {*} data
  * @returns {Erry}
@@ -140,42 +170,37 @@ Erry.prototype.notify = function (type = 'info', msg) {
   // check type
   if (typeof type !== 'string') {
     self._payload.instance_errors.push(`.notify: Received type of type ${typeof msg}`);
-    type = 'info';
+    type = '';
   }
   
   if (type.length === 0) {
     self._payload.instance_errors.push(`.notify: Received type of length 0`);
-    type = 'info';
+    type = '';
   }
   
   if (['error', 'warning', 'info'].indexOf(type) === -1) {
     self._payload.instance_errors.push(`.notify: Unknown error type ${type}`);
-    type = 'info';
+    type = '';
   }
   
-  self._payload.notification.type = type;
+  if (type) {
+    self._payload.notification.type = type;
+  }
   
   // check msg
   if (typeof msg !== 'string') {
     self._payload.instance_errors.push(`.notify: Received msg of type ${typeof msg}`);
-    msg = self._defaults.message;
+    msg = '';
   }
   
   if (msg.length === 0) {
     self._payload.instance_errors.push(`.notify: Received msg of length 0`);
-    msg = self._defaults.message;
+    msg = '';
   }
   
-  self._payload.notification.msg = msg;
-  
-  // change iff not default
-  if (self._payload.message === self._defaults.message) {
-    self._payload.message = msg;
-  }
-  
-  // change iff not default
-  if (self.message === self._defaults.message) {
-    self.message = msg;
+  if (msg) {
+    self._payload.notification.msg = msg;
+    self._applyMessage(msg);
   }
   
   return self;
@@ -199,35 +224,23 @@ Erry.prototype.systemError = function (message) {
   if (message) {
     if (typeof message !== 'string') {
       self._payload.instance_errors.push(`.systemError: Received message of type ${typeof message}`);
-      message = self._defaults.message;
+      message = '';
     }
     
     if (message.length === 0) {
       self._payload.instance_errors.push(`.notify: Received msg of length 0`);
-      message = self._defaults.message;
+      message = '';
     }
-  }
-  else {
-    message = self._defaults.message;
   }
   
   if (!self._payload.notification.status) {
     self._payload.notification.status = true;
-    self._payload.notification.msg    = self._defaults.message;
   }
   
   // override
-  self._payload.notification.type = 'warning';
+  self._payload.notification.type = 'error';
   
-  // change iff not default
-  if (self._payload.message === self._defaults.message) {
-    self._payload.message = message;
-  }
-  
-  // change iff not default
-  if (self.message === self._defaults.message) {
-    self.message = message;
-  }
+  self._applyMessage(message);
   
   return self;
 };
@@ -246,6 +259,15 @@ Erry.prototype.code = function (code = 500) {
   
   self._payload.code = code;
   
+  var code_msg = errorCodeMessage(code, self._defaults.message);
+  
+  // apply message only but don't switch notification.status ->true
+  // notification.status is explicitly set by self.notify
+  if (code_msg) {
+    self._payload.notification.msg = code_msg;
+    self._applyMessage(code_msg);
+  }
+  
   return self;
 };
 
@@ -258,19 +280,17 @@ Erry.prototype.setName = function (name) {
   var self = this;
   if (typeof name !== 'string') {
     self._payload.instance_errors.push(`.name: Received name of type ${typeof name}`);
-    name = self._defaults.name;
+    name = '';
   }
   
   if (name.length === 0) {
     self._payload.instance_errors.push(`.name: Received name of length 0`);
-    name = self._defaults.name;
+    name = '';
   }
   
-  self._payload.name = name;
-  
-  // if self.name is still default, change it
-  if (self.name === self._defaults.name) {
-    self.name = name;
+  if (name) {
+    self._payload.name = name;
+    self.name          = name;
   }
   
   return self;
@@ -286,19 +306,16 @@ Erry.prototype.setMessage = function (message) {
   
   if (typeof message !== 'string') {
     self._payload.instance_errors.push(`.message: Received message of type ${typeof message}`);
-    message = self._defaults.message;
+    message = '';
   }
   
   if (message.length === 0) {
     self._payload.instance_errors.push(`.message: Received message of length 0`);
-    message = self._defaults.message;
+    message = '';
   }
   
-  self._payload.message = message;
-  
-  // if self.message is still default, change it
-  if (self.message === self._defaults.message) {
-    self.message = message;
+  if (message) {
+    self._applyMessage(message);
   }
   
   return self;
