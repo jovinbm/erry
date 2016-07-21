@@ -158,24 +158,25 @@ Erry.prototype.request = function (url) {
 
 /**
  *
- * @returns {Erry}
- */
-Erry.prototype.dontNotify = function () {
-  var self                          = this;
-  self._payload.notification.status = false;
-  return self;
-};
-
-/**
- *
+ * @param {boolean} status
  * @param {string} type - [info|warning|error]
  * @param {string} msg
  * @returns {Erry}
  */
-Erry.prototype.notify = function (type = 'info', msg) {
+Erry.prototype.notify = function (status = true, type = 'info', msg) {
   var self = this;
   
   self._payload.notification.status = true;
+  
+  // check status
+  if (typeof type !== 'boolean') {
+    self._payload.instance_errors.push(`.notify: Received status of type ${typeof status}`);
+    
+    // default to true
+    status = true;
+  }
+  
+  self._payload.notification.status = status;
   
   // check type
   if (typeof type !== 'string') {
