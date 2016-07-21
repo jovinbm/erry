@@ -186,6 +186,9 @@ Erry.prototype.systemError = function (message) {
   // incur system error code
   self._payload.code = 500;
   
+  // add fatal flag
+  self._payload.fatal = true;
+  
   // check message
   if (typeof message !== 'string') {
     self._payload.instance_errors.push(`.systemError: Received message of type ${typeof message}`);
