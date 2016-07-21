@@ -229,7 +229,7 @@ Erry.prototype.notify = function (status = true, type = 'info', msg) {
 };
 
 /**
- *
+ * - Does not touch self._payload.notification.msg
  * @param {string} [message]
  * @returns {Erry}
  */
