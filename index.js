@@ -168,8 +168,14 @@ Erry.prototype.notify = function (type = 'info', msg) {
   
   self._payload.notification.msg = msg;
   
+  // change iff not default
   if (self._payload.message === self._defaults.message) {
     self._payload.message = msg;
+  }
+  
+  // change iff not default
+  if (self.message === self._defaults.message) {
+    self.message = msg;
   }
   
   return self;
