@@ -229,7 +229,7 @@ Erry.prototype.notify = function (status = true, type = 'info', msg) {
 };
 
 /**
- * - Does not touch self._payload.notification.msg
+ * - Does not touch self._payload.notification except it changes it's type to 'error'
  * @param {string} [message]
  * @returns {Erry}
  */
@@ -255,10 +255,6 @@ Erry.prototype.systemError = function (message) {
     }
     
     self._applyMessage(message);
-  }
-  
-  if (!self._payload.notification.status) {
-    self._payload.notification.status = true;
   }
   
   // override
