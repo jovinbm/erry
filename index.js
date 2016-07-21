@@ -158,15 +158,13 @@ Erry.prototype.request = function (url) {
 
 /**
  *
- * @param {boolean} status
+ * @param {boolean} [status=true]
  * @param {string} [type] - [info|warning|error]
  * @param {string} [msg] - Notification message. This msg is applied to self.message, self._payload.message (If they are not changed)
  * @returns {Erry}
  */
 Erry.prototype.notify = function (status = true, type = 'info', msg) {
   var self = this;
-  
-  self._payload.notification.status = true;
   
   // check status
   if (typeof type !== 'boolean') {
@@ -179,39 +177,45 @@ Erry.prototype.notify = function (status = true, type = 'info', msg) {
   self._payload.notification.status = status;
   
   // check type
-  if (typeof type !== 'string') {
-    self._payload.instance_errors.push(`.notify: Received type of type ${typeof msg}`);
-    type = '';
-  }
-  
-  if (type.length === 0) {
-    self._payload.instance_errors.push(`.notify: Received type of length 0`);
-    type = '';
-  }
-  
-  if (['error', 'warning', 'info'].indexOf(type) === -1) {
-    self._payload.instance_errors.push(`.notify: Unknown error type ${type}`);
-    type = '';
-  }
-  
   if (type) {
-    self._payload.notification.type = type;
+    if (typeof type !== 'string') {
+      self._payload.instance_errors.push(`.notify: Received type of type ${typeof msg}`);
+      type = '';
+    }
+    
+    if (type.length === 0) {
+      self._payload.instance_errors.push(`.notify: Received type of length 0`);
+      type = '';
+    }
+    
+    if (['error', 'warning', 'info'].indexOf(type) === -1) {
+      self._payload.instance_errors.push(`.notify: Unknown error type ${type}`);
+      type = '';
+    }
+    
+    // check again after changes
+    if (type) {
+      self._payload.notification.type = type;
+    }
   }
   
   // check msg
-  if (typeof msg !== 'string') {
-    self._payload.instance_errors.push(`.notify: Received msg of type ${typeof msg}`);
-    msg = '';
-  }
-  
-  if (msg.length === 0) {
-    self._payload.instance_errors.push(`.notify: Received msg of length 0`);
-    msg = '';
-  }
-  
   if (msg) {
-    self._payload.notification.msg = msg;
-    self._applyMessage(msg);
+    if (typeof msg !== 'string') {
+      self._payload.instance_errors.push(`.notify: Received msg of type ${typeof msg}`);
+      msg = '';
+    }
+    
+    if (msg.length === 0) {
+      self._payload.instance_errors.push(`.notify: Received msg of length 0`);
+      msg = '';
+    }
+    
+    // check again after changes
+    if (msg) {
+      self._payload.notification.msg = msg;
+      self._applyMessage(msg);
+    }
   }
   
   return self;
