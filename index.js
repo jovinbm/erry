@@ -24,7 +24,7 @@ function Erry(error) {
     },
     code           : 500,
     name           : self._defaults.name,
-    message        : self._defaults.message,
+    messages       : [self._defaults.message],
     handled        : false,
     logout         : false,
     request        : null,
@@ -37,8 +37,8 @@ function Erry(error) {
   };
   
   // emulate norma error
-  self.name    = self._defaults.name;
-  self.message = self._defaults.message;
+  self.name    = 'Erry Error';
+  self.message = '';
   self.stack   = (new Error()).stack;
   
   if (error && typeof error === 'object') {
@@ -74,7 +74,7 @@ Erry.prototype             = Object.create(Error.prototype);
 Erry.prototype.constructor = Erry;
 
 /**
- * Private: Applies message to self.message, self._payload.message of
+ * Private: Applies message to self.message, self._payload.messages of
  * the error IF they are still default
  * @param {string} message
  * @returns {Erry}
@@ -93,10 +93,17 @@ Erry.prototype._applyMessage = function (message) {
     return self;
   }
   
+  if (!self.message) {
+    self.message = message;
+  }
+  
   // change iff not default
   if (message !== self._defaults.message) {
-    self._payload.message = message;
-    self.message          = message;
+    
+    // ignore if last is equal to message
+    if (self._payload.messages[self._payload.messages.length - 1] !== message) {
+      self._payload.messages.push(message);
+    }
   }
   
   return self;
@@ -246,6 +253,8 @@ Erry.prototype.systemError = function (message) {
       self._payload.instance_errors.push(`.notify: Received msg of length 0`);
       message = '';
     }
+    
+    self._applyMessage(message);
   }
   
   if (!self._payload.notification.status) {
@@ -254,8 +263,6 @@ Erry.prototype.systemError = function (message) {
   
   // override
   self._payload.notification.type = 'error';
-  
-  self._applyMessage(message);
   
   return self;
 };
