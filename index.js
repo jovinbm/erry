@@ -159,8 +159,8 @@ Erry.prototype.request = function (url) {
 /**
  *
  * @param {boolean} status
- * @param {string} type - [info|warning|error]
- * @param {string} msg - Notification message. This msg is applied to self.message, self._payload.message (If they are not changed)
+ * @param {string} [type] - [info|warning|error]
+ * @param {string} [msg] - Notification message. This msg is applied to self.message, self._payload.message (If they are not changed)
  * @returns {Erry}
  */
 Erry.prototype.notify = function (status = true, type = 'info', msg) {
