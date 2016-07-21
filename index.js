@@ -183,7 +183,7 @@ Erry.prototype.notify = function (type = 'info', msg) {
 
 /**
  *
- * @param {string} message
+ * @param {string} [message]
  * @returns {Erry}
  */
 Erry.prototype.systemError = function (message) {
@@ -196,13 +196,18 @@ Erry.prototype.systemError = function (message) {
   self._payload.fatal = true;
   
   // check message
-  if (typeof message !== 'string') {
-    self._payload.instance_errors.push(`.systemError: Received message of type ${typeof message}`);
-    message = self._defaults.message;
+  if (message) {
+    if (typeof message !== 'string') {
+      self._payload.instance_errors.push(`.systemError: Received message of type ${typeof message}`);
+      message = self._defaults.message;
+    }
+    
+    if (message.length === 0) {
+      self._payload.instance_errors.push(`.notify: Received msg of length 0`);
+      message = self._defaults.message;
+    }
   }
-  
-  if (message.length === 0) {
-    self._payload.instance_errors.push(`.notify: Received msg of length 0`);
+  else {
     message = self._defaults.message;
   }
   
