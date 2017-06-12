@@ -28,7 +28,7 @@ module.exports = function (d) {
         }
         catch (e) {
           console.warn('Erry Logger: Failed to stringify error');
-          console.log(JSON.stringify(e, null, 4));
+          console.log(e);
         }
       }
       else {
@@ -39,7 +39,7 @@ module.exports = function (d) {
         }
         catch (e) {
           console.warn('Erry Logger: Failed to stringify error');
-          console.log(JSON.stringify(e, null, 4));
+          console.log(e);
         }
       }
     }
@@ -51,7 +51,7 @@ module.exports = function (d) {
       }
       catch (e) {
         console.warn('Erry Logger: Failed to stringify error');
-        console.log(JSON.stringify(e, null, 4));
+        console.log(e);
       }
     }
   };
