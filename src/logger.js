@@ -23,18 +23,36 @@ module.exports = function (d) {
       if (e._payload.fatal) {
         logger(self.stack);
         delete e.stack;
-        logger(JSON.stringify(e, null, 4));
+        try {
+          logger(JSON.stringify(e, null, 4));
+        }
+        catch (e) {
+          console.warn('Erry Logger: Failed to stringify error');
+          console.log(JSON.stringify(e, null, 4));
+        }
       }
       else {
         logger(self.stack);
         delete e.stack;
-        logger(JSON.stringify(e, null, 4));
+        try {
+          logger(JSON.stringify(e, null, 4));
+        }
+        catch (e) {
+          console.warn('Erry Logger: Failed to stringify error');
+          console.log(JSON.stringify(e, null, 4));
+        }
       }
     }
     else {
       logger(self.stack);
       delete e.stack;
-      logger(JSON.stringify(e, null, 4));
+      try {
+        logger(JSON.stringify(e, null, 4));
+      }
+      catch (e) {
+        console.warn('Erry Logger: Failed to stringify error');
+        console.log(JSON.stringify(e, null, 4));
+      }
     }
   };
   

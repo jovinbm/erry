@@ -1,0 +1,16 @@
+{
+  "presets": [
+    "es2015"
+  ],
+  "plugins": [
+    "transform-decorators-legacy",
+    "transform-object-assign",
+    "transform-object-rest-spread",
+    "transform-regenerator",
+    "lodash"
+  ],
+  "compact": false,
+  "minified": false,
+  "retainLines": true,
+  "comments": true
+}

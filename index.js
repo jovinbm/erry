@@ -1,5 +1,5 @@
 // error module
-exports.Erry = require('./lib/Erry');
+exports.Erry = require('./build/Erry');
 
 // inter-promise communication module (has error context to avoid promise rejection warning
-exports.Errc = require('./lib/Errc');
+exports.Errc = require('./build/Errc');
